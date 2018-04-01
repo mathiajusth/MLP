@@ -3,28 +3,44 @@ module DataVectors
 import DataIndexes
 %access public export
 
-data Vect: Type -> Nat -> Type where
-  Nil: Vect t 0
-  (::): t -> Vect t m -> Vect t (S m)
+data Vect: Nat -> Type -> Type where
+  Nil: Vect 0 t
+  (::): t -> Vect m t -> Vect (S m) t
 
-interface Indexable (F: Type -> Nat -> Type) where
-  index: Index m -> F a m -> a
+Functor (Vect m) where
+  map _ Nil = Nil
+  map f (x::xs) = f x :: map f xs
 
-Indexable Vect where
+size: Vect m a -> Nat
+size Nil = 0
+size (x::xs) = 1 + size xs
+
+vectorify: (xs: List a) -> Vect (size xs) a
+vectorify Nil = Nil
+vectorify (x::xs) = x :: vectorify xs
+
+listify: (xs: Vect m a) -> List a
+listify Nil = Nil
+listify (x::xs) = x :: listify xs
+
+interface ShallowIndexable (F: Nat -> Type -> Type) where
+  index: Index m -> F m a -> a
+
+ShallowIndexable Vect where
   index F (x::xs) = x
   index (N i) (x::xs) = index i xs
 
-map: (a -> b) -> Vect a m -> Vect b m
-map _ Nil = Nil
-map f (x :: xs) = f x :: map f xs
-
-x: Vect Nat 2
+{- map: (a -> b) -> Vect a m -> Vect b m -}
+{- map _ Nil = Nil -}
+{- map f (x :: xs) = f x :: map f xs -}
+{-  -}
+x: Vect 2 Nat
 x = [1,2]
-
-switch: (Type -> Nat -> Type) -> Nat -> Type -> Type
-switch f x y = f y x
-y: (switch Vect) 2 Nat
-y = [1,2]
+{-  -}
+{- switch: (Type -> Nat -> Type) -> Nat -> Type -> Type -}
+{- switch f x y = f y x -}
+{- y: (switch Vect) 2 Nat -}
+{- y = [1,2] -}
 
 {- newLine: String -}
 {- newLine = " " -}
